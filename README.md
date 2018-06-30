@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/react-machinery.svg)]()
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
-[![CircleCI](https://circleci.com/gh/francisrstokes/React-Machinery.png?circle-token=3421db73295e08ca6bb4a55ed55c24a91c2ebf94&style=shield)]()
+[![CircleCI](https://circleci.com/gh/francisrstokes/React-Machinery.png?circle-token=46dc2a2f9571dfc783c03c6550c3119c18c5b8ce&style=shield)]()
 
 
 ⚙️ State Machine Modelling for React
@@ -94,6 +94,12 @@ class Example extends React.Component {
   }
 }
 ```
+
+The above example represents the following state diagram:
+
+![State diagram of code above](StateDiagram.png)
+
+While not a particularly complex set of states, it illustrates how `React Machinery` can be used to create predictable and bug free flows. Notice that it is simply not possible to get to the `lifeTheUniverseAndEverything` state from anything but the `theNumberTen` state.
 
 ## Installation
 
