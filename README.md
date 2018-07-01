@@ -8,8 +8,14 @@
 ⚙️ State Machine Modelling for React
 
 - [Description](#description)
-  - [Example](#example)
+  - [Examples](#examples)
 - [Installation](#installation)
+- [API](#api)
+  - [StateMachine](#statemachine)
+    - [getCurrentState](#getcurrentstate)
+    - [setNewState](#setnewstate)
+    - [states](#states)
+    - [data](#data)
 
 ## Description
 
@@ -17,89 +23,14 @@
 
 Describe your states, transitions, and which component each renders, and plug it into the `StateMachine` component. It accepts two extra functions; one for getting the current state name and one for setting it. This allows your app to flexibly use and swap out different ways of storing data - be it in component state, redux, mobx, whatever.
 
-### Example
+### Examples
 
-```javascript
-const states = [
-  {
-    name: 'theNumberOne',
-    transitions: [
-      {
-        test: specialNumber => specialNumber === 2,
-        newState: 'theNumberTwo'
-      }
-    ],
-    component: <One/>
-  },
-  {
-    name: 'theNumberTwo',
-    transitions: [
-      {
-        test: specialNumber => specialNumber === 1,
-        newState: 'theNumberOne'
-      },
-      {
-        test: specialNumber => specialNumber === 10,
-        newState: 'theNumberTen'
-      },
-    ],
-    component: <Two/>
-  },
-  {
-    name: 'theNumberTen',
-    transitions: [
-      {
-        test: specialNumber => specialNumber === 1,
-        newState: 'theNumberOne'
-      },
-      {
-        test: specialNumber => specialNumber === 42,
-        newState: 'lifeTheUniverseAndEverything'
-      }
-    ],
-    component: <Ten/>
-  },
-  {
-    name: 'lifeTheUniverseAndEverything',
-    transitions: [],
-    component: <HitchHikerComponent/>
-  },
-];
+Examples of how the following state diagram can be implemented in both vanilla react and using redux can be found in the examples folder.
 
-class Example extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      specialNumber: 1,
-      stateName: 'theNumberOne'
-    };
-  }
+- [Example using react](examples/1.Normal-Component-State.js)
+- [Example using redux](examples/2.With-Redux.js)
 
-  render() {
-    return <div>
-      <StateMachine
-        getCurrentState={() => this.state.stateName}
-        setNewState={stateName => this.setState(() => ({ stateName }))}
-        data={this.state.specialNumber}
-        states={states}
-      />
-
-      <div>{this.state.specialNumber}</div>
-
-      <button onClick={() => this.setState(() => ({specialNumber: this.state.specialNumber + 1}))}>+1</button>
-      <button onClick={() => this.setState(() => ({specialNumber: this.state.specialNumber + 10}))}>+10</button>
-      <button onClick={() => this.setState(() => ({specialNumber: this.state.specialNumber - 1}))}>-1</button>
-      <button onClick={() => this.setState(() => ({specialNumber: this.state.specialNumber - 10}))}>-10</button>
-    </div>;
-  }
-}
-```
-
-The above example represents the following state diagram:
-
-![State diagram of code above](StateDiagram.png)
-
-While not a particularly complex set of states, it illustrates how `React Machinery` can be used to create predictable and bug free flows. Notice that it is simply not possible to get to the `lifeTheUniverseAndEverything` state from anything but the `theNumberTen` state.
+![State diagram of code below](StateDiagram.png)
 
 ## Installation
 
@@ -110,3 +41,62 @@ yarn add react-machinery
 # or with npm
 npm i react-machinery
 ```
+
+## API
+
+### StateMachine
+
+All props for the `StateMachine` component are required.
+
+#### getCurrentState
+
+##### function()
+
+A function returning the current state name, stored somewhere like a react component state, or in redux.
+
+#### setNewState
+
+##### function(newStateName)
+
+A function that updates the current state, stored somewhere like a react component state, or in redux.
+
+#### states
+
+##### Array of state definitions
+
+A state definition is a plain javascript object with the following properties:
+
+```javascript
+{
+  // This name corresponds to the one coming from getCurrentState() and
+  // being set by setNewState()
+  name: 'State Name',
+
+  // Array of plain objects that describe transitions
+  transitions: [
+    // A transition object must contain two properties:
+    // test, which is a function that recieves the StateMachine data, and returns true if a state change should take place
+    // newState, which is the name of the state to transition to when the test function returns true
+    {
+      test: data => data === 'expected for state change',
+      newState: 'Name of new state'
+    }
+  ],
+
+    // One of the following two properties must be implemented:
+
+  // a render prop that recieves the name of the current state as an argument
+  render: currentState => {
+    return <SomeComponent propUsingStateName={currentState} />
+  },
+
+  // Or just a regular react component
+  component: SomeReactComponent,
+}
+```
+
+#### data
+
+##### any
+
+Any kind of data that defines all the states in the state machine.
