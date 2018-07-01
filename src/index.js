@@ -42,8 +42,7 @@ export class StateMachine extends React.Component {
     );
 
     if (currentState.render) return currentState.render(currentStateName);
-    if (currentState.component)
-      return React.createElement(currentState.component);
+    if (currentState.component) return React.createElement(currentState.component);
 
     throw new Error(
       `Neither a valid render or component property was found for state '${currentStateName}'`

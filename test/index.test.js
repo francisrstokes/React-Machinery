@@ -255,3 +255,76 @@ test('Transition from one state to another when presented with multiple options'
   expect(stateMachine.text()).toEqual('State 3');
 });
 
+test('Throw on an invalid render prop', () => {
+  spyOn(console, 'error');
+  const data = {};
+  const state = 'state-2';
+
+  const states = [
+    {
+      name: 'state-1',
+      transitions: [],
+      render: /NotAComponent/
+    }
+  ];
+
+  expect(() => {
+    mount(
+      <StateMachine
+        getCurrentState={() => state}
+        setNewState={() => {}}
+        data={data}
+        states={states}
+      />
+    );
+  }).toThrow();
+});
+
+test('Throw on an invalid component', () => {
+  spyOn(console, 'error');
+  const data = {};
+  const state = 'state-2';
+
+  const states = [
+    {
+      name: 'state-1',
+      transitions: [],
+      component: /NotAComponent/
+    }
+  ];
+
+  expect(() => {
+    mount(
+      <StateMachine
+        getCurrentState={() => state}
+        setNewState={() => {}}
+        data={data}
+        states={states}
+      />
+    );
+  }).toThrow();
+});
+
+test('Throw when niether a render nor a component is provided', () => {
+  spyOn(console, 'error');
+  const data = {};
+  const state = 'state-1';
+
+  const states = [
+    {
+      name: 'state-1',
+      transitions: []
+    }
+  ];
+
+  expect(() => {
+    mount(
+      <StateMachine
+        getCurrentState={() => state}
+        setNewState={() => {}}
+        data={data}
+        states={states}
+      />
+    );
+  }).toThrow();
+});
