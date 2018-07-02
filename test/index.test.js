@@ -60,6 +60,66 @@ test('Render a valid state (render prop)', () => {
   expect(stateMachine.text()).toEqual('Hello, state-1');
 });
 
+test('Should pass additional props to state component if they are present', () => {
+  const data = {};
+  const state = 'state-1';
+
+  const states = [
+    {
+      name: 'state-1',
+      transitions: [],
+      component: State1Component
+    }
+  ];
+
+  const extraProps = {
+    extraProp1: 'hello!'
+  };
+
+  const stateMachine = mount(
+    <StateMachine
+      getCurrentState={() => state}
+      setNewState={() => {}}
+      data={data}
+      states={states}
+      props={extraProps}
+    />
+  );
+
+  expect(stateMachine.children().props()).toEqual(extraProps);
+});
+
+test('Should pass additional props to state render if they are present', () => {
+  const data = {};
+  const state = 'state-1';
+
+  const states = [
+    {
+      name: 'state-1',
+      transitions: [],
+      render: (currentState, props) => {
+        return <State1Component {...props}/>
+      }
+    }
+  ];
+
+  const extraProps = {
+    extraProp1: 'hello!'
+  };
+
+  const stateMachine = mount(
+    <StateMachine
+      getCurrentState={() => state}
+      setNewState={() => {}}
+      data={data}
+      states={states}
+      props={extraProps}
+    />
+  );
+
+  expect(stateMachine.children().props()).toEqual(extraProps);
+});
+
 test('Throw on an invalid state', () => {
   spyOn(console, 'error');
   const data = {};

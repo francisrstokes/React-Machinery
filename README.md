@@ -86,12 +86,13 @@ A state definition is a plain javascript object with the following properties:
     // One of the following two properties must be implemented:
 
   // a render prop that recieves the name of the current state as an argument
-  render: currentState => {
-    return <SomeComponent propUsingStateName={currentState} />
+  // The second argument passes the 'props' object supplied to the StateMachine
+  render: (currentState, additionalProps) => {
+    return <SomeComponent propUsingStateName={currentState} {...additionalProps} />
   },
 
   // Or just a regular react component
-  component: SomeReactComponent,
+  component: SomeReactComponent
 }
 ```
 
@@ -100,3 +101,9 @@ A state definition is a plain javascript object with the following properties:
 ##### any
 
 Any kind of data that defines all the states in the state machine.
+
+#### props
+
+##### object
+
+These props are supplied to the component rendered by any state. If a render prop is used for the state, then the props are passed as the second argument.
