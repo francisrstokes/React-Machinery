@@ -1,6 +1,6 @@
 {
   "name": "react-machinery",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Control React UI trees with a State Machine",
   "main": "lib/index.js",
   "scripts": {
