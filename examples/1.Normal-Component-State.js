@@ -22,7 +22,7 @@ const HitchHikerComponent = () => <div>Theres a frood who really knows where his
 const states = [
   {
     name: 'theNumberOne',
-    transitions: [
+    autoTransitions: [
       {
         test: n => n === 2,
         newState: 'theNumberTwo'
@@ -32,7 +32,7 @@ const states = [
   },
   {
     name: 'theNumberTwo',
-    transitions: [
+    autoTransitions: [
       {
         test: n => n === 1,
         newState: 'theNumberOne'
@@ -46,7 +46,7 @@ const states = [
   },
   {
     name: 'theNumberTen',
-    transitions: [
+    autoTransitions: [
       {
         test: n => n === 1,
         newState: 'theNumberOne'
@@ -60,7 +60,6 @@ const states = [
   },
   {
     name: 'lifeTheUniverseAndEverything',
-    transitions: [],
     component: <HitchHikerComponent/>
   },
 ];

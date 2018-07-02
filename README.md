@@ -16,6 +16,7 @@
     - [setNewState](#setnewstate)
     - [states](#states)
     - [data](#data)
+    - [props](#props)
 
 ## Description
 
@@ -72,8 +73,9 @@ A state definition is a plain javascript object with the following properties:
   // being set by setNewState()
   name: 'State Name',
 
-  // Array of plain objects that describe transitions
-  transitions: [
+  // Array of plain objects that describe automatic transitions
+  // These are evaluated after a transition and when props change
+  autoTransitions: [
     // A transition object must contain two properties:
     // test, which is a function that recieves the StateMachine data, and returns true if a state change should take place
     // newState, which is the name of the state to transition to when the test function returns true
@@ -81,6 +83,14 @@ A state definition is a plain javascript object with the following properties:
       test: data => data === 'expected for state change',
       newState: 'Name of new state'
     }
+  ],
+
+  // This is a list of states that can be transitioned to from the current state using the transitionTo
+  // prop passed to a state component. Trying to use transitionTo with a state not specified in this list
+  // will throw an error. This list, together with any 'newState's described in autoTransitions form the
+  // full set of valid transitions for this state.
+  validTransitions: [
+    'Name of valid state'
   ],
 
     // One of the following two properties must be implemented:

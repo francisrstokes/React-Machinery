@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 export class StateMachine extends React.Component {
   constructor(props) {
     super(props);
-    this.transition("<no state>", this.props.getCurrentState());
+    this.transition('<no state>', this.props.getCurrentState());
     this.update();
   }
 
@@ -23,10 +23,12 @@ export class StateMachine extends React.Component {
     const currentStateName = getCurrentState();
     const currentState = states.find(state => state.name === currentStateName);
 
-    for (const transition of currentState.transitions) {
-      if (transition.test(data)) {
-        this.transition(currentStateName, transition.newState);
-        return;
+    if (Array.isArray(currentState.autoTransitions)) {
+      for (const transition of currentState.autoTransitions) {
+        if (transition.test(data)) {
+          this.transition(currentStateName, transition.newState);
+          return;
+        }
       }
     }
   }
@@ -41,7 +43,18 @@ export class StateMachine extends React.Component {
       state => state.name === currentStateName
     );
 
-    const additionalProps = this.props.props || undefined;
+    const additionalProps = {
+      ...(this.props.props || {}),
+      transitionTo: newState => {
+        if (!(currentState.validTransitions && currentState.validTransitions.includes(newState))) {
+          throw new Error(
+            `'${newState}' is not listed in transitions array for state ${currentStateName}`
+          );
+        }
+        this.transition(currentStateName, newState);
+      },
+    };
+
     if (currentState.render) return currentState.render(currentStateName, additionalProps);
     if (currentState.component) return React.createElement(currentState.component, additionalProps);
 
@@ -51,7 +64,7 @@ export class StateMachine extends React.Component {
   }
 }
 
-const transitionsPropTypes = PropTypes.arrayOf(
+const autoTransitionsPropTypes = PropTypes.arrayOf(
   PropTypes.shape({
     test: PropTypes.func.isRequired,
     newState: PropTypes.string.isRequired
@@ -61,7 +74,8 @@ const transitionsPropTypes = PropTypes.arrayOf(
 const statePropTypes = PropTypes.arrayOf(
   PropTypes.shape({
     name: PropTypes.string.isRequired,
-    transitions: transitionsPropTypes,
+    autoTransitions: autoTransitionsPropTypes,
+    validTransitions: PropTypes.arrayOf(PropTypes.string),
 
     component: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     render: PropTypes.func

@@ -21,7 +21,6 @@ test('Render a valid state', () => {
   const states = [
     {
       name: 'state-1',
-      transitions: [],
       component: State1Component
     }
   ];
@@ -44,7 +43,6 @@ test('Render a valid state (render prop)', () => {
   const states = [
     {
       name: 'state-1',
-      transitions: [],
       render: stateName => <div>Hello, {stateName}</div>
     }
   ];
@@ -67,7 +65,6 @@ test('Should pass additional props to state component if they are present', () =
   const states = [
     {
       name: 'state-1',
-      transitions: [],
       component: State1Component
     }
   ];
@@ -86,7 +83,8 @@ test('Should pass additional props to state component if they are present', () =
     />
   );
 
-  expect(stateMachine.children().props()).toEqual(extraProps);
+  const propNames = Object.keys(stateMachine.children().props());
+  expect(propNames.includes('extraProp1')).toEqual(true);
 });
 
 test('Should pass additional props to state render if they are present', () => {
@@ -96,7 +94,6 @@ test('Should pass additional props to state render if they are present', () => {
   const states = [
     {
       name: 'state-1',
-      transitions: [],
       render: (currentState, props) => {
         return <State1Component {...props}/>
       }
@@ -117,7 +114,35 @@ test('Should pass additional props to state render if they are present', () => {
     />
   );
 
-  expect(stateMachine.children().props()).toEqual(extraProps);
+  const propNames = Object.keys(stateMachine.children().props());
+  expect(propNames.includes('extraProp1')).toEqual(true);
+});
+
+test('Rendered components should be passed a transitionTo function', () => {
+  const data = {};
+  const state = 'state-1';
+
+  const states = [
+    {
+      name: 'state-1',
+      render: (currentState, props) => {
+        return <State1Component {...props}/>
+      }
+    }
+  ];
+
+  const stateMachine = mount(
+    <StateMachine
+      getCurrentState={() => state}
+      setNewState={() => {}}
+      data={data}
+      states={states}
+    />
+  );
+
+  const childProps = stateMachine.children().props();
+  expect(Boolean(childProps.transitionTo)).toEqual(true);
+  expect(typeof childProps.transitionTo).toEqual('function');
 });
 
 test('Throw on an invalid state', () => {
@@ -128,7 +153,6 @@ test('Throw on an invalid state', () => {
   const states = [
     {
       name: 'state-1',
-      transitions: [],
       component: State1Component
     }
   ];
@@ -152,7 +176,7 @@ test('Transition from one state to another', async () => {
   const states = [
     {
       name: 'state-1',
-      transitions: [
+      autoTransitions: [
         {
           test: ({a}) => a === 2,
           newState: 'state-2'
@@ -162,7 +186,6 @@ test('Transition from one state to another', async () => {
     },
     {
       name: 'state-2',
-      transitions: [],
       component: State2Component
     }
   ];
@@ -210,7 +233,7 @@ test('Throw when transitioning from one state to an invalid one', async () => {
   const states = [
     {
       name: 'state-1',
-      transitions: [
+      autoTransitions: [
         {
           test: ({a}) => a === 2,
           newState: 'state-3'
@@ -220,7 +243,6 @@ test('Throw when transitioning from one state to an invalid one', async () => {
     },
     {
       name: 'state-2',
-      transitions: [],
       component: State2Component
     }
   ];
@@ -256,7 +278,7 @@ test('Transition from one state to another when presented with multiple options'
   const states = [
     {
       name: 'state-1',
-      transitions: [
+      autoTransitions: [
         {
           test: ({a}) => a === 2,
           newState: 'state-2'
@@ -270,12 +292,10 @@ test('Transition from one state to another when presented with multiple options'
     },
     {
       name: 'state-2',
-      transitions: [],
       component: State2Component
     },
     {
       name: 'state-3',
-      transitions: [],
       component: State3Component
     }
   ];
@@ -315,6 +335,89 @@ test('Transition from one state to another when presented with multiple options'
   expect(stateMachine.text()).toEqual('State 3');
 });
 
+test('Transition to a valid state when calling transitionTo', async () => {
+  const data = { a: 1, b: 1 };
+  let state = 'state-1';
+
+  const states = [
+    {
+      name: 'state-1',
+      validTransitions: ['state-2'],
+      component: State1Component
+    },
+    {
+      name: 'state-2',
+      component: State2Component
+    }
+  ];
+
+  const getCurrentState = () => state;
+  const setNewState = newState => state = newState;
+
+  let stateMachine = mount(
+    <StateMachine
+      getCurrentState={getCurrentState}
+      setNewState={setNewState}
+      data={data}
+      states={states}
+    />
+  );
+
+  expect(stateMachine.text()).toEqual('State 1');
+
+  const transitionToFn = stateMachine.children().props().transitionTo;
+  transitionToFn('state-2');
+
+  // Call set props to trigger an update
+  const setProps = promisify(stateMachine.setProps, stateMachine);
+  await setProps({
+    getCurrentState,
+    setNewState,
+    data: data,
+    states,
+  });
+
+  expect(stateMachine.text()).toEqual('State 2');
+});
+
+test('Throw an error when calling transitionTo with an invalid new state', async () => {
+  const data = { a: 1, b: 1 };
+  let state = 'state-1';
+
+  const states = [
+    {
+      name: 'state-1',
+      validTransitions: ['state-2'],
+      component: State1Component
+    },
+    {
+      name: 'state-2',
+      component: State2Component
+    },
+    {
+      name: 'state-3',
+      component: State2Component
+    }
+  ];
+
+  const getCurrentState = () => state;
+  const setNewState = newState => state = newState;
+
+  let stateMachine = mount(
+    <StateMachine
+      getCurrentState={getCurrentState}
+      setNewState={setNewState}
+      data={data}
+      states={states}
+    />
+  );
+
+  expect(stateMachine.text()).toEqual('State 1');
+
+  const transitionToFn = stateMachine.children().props().transitionTo;
+  expect(() => transitionToFn('state-3')).toThrow();
+});
+
 test('Throw on an invalid render prop', () => {
   spyOn(console, 'error');
   const data = {};
@@ -323,7 +426,6 @@ test('Throw on an invalid render prop', () => {
   const states = [
     {
       name: 'state-1',
-      transitions: [],
       render: /NotAComponent/
     }
   ];
@@ -348,7 +450,6 @@ test('Throw on an invalid component', () => {
   const states = [
     {
       name: 'state-1',
-      transitions: [],
       component: /NotAComponent/
     }
   ];
@@ -373,7 +474,6 @@ test('Throw when niether a render nor a component is provided', () => {
   const states = [
     {
       name: 'state-1',
-      transitions: []
     }
   ];
 
