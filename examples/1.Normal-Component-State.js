@@ -24,43 +24,43 @@ const states = [
     name: 'theNumberOne',
     autoTransitions: [
       {
-        test: n => n === 2,
+        test: ({n}) => n === 2,
         newState: 'theNumberTwo'
       }
     ],
-    component: <One/>
+    component: One
   },
   {
     name: 'theNumberTwo',
     autoTransitions: [
       {
-        test: n => n === 1,
+        test: ({n}) => n === 1,
         newState: 'theNumberOne'
       },
       {
-        test: n => n === 10,
+        test: ({n}) => n === 10,
         newState: 'theNumberTen'
       },
     ],
-    component: <Two/>
+    component: Two
   },
   {
     name: 'theNumberTen',
     autoTransitions: [
       {
-        test: n => n === 1,
+        test: ({n}) => n === 1,
         newState: 'theNumberOne'
       },
       {
-        test: n => n === 42,
+        test: ({n}) => n === 42,
         newState: 'lifeTheUniverseAndEverything'
       }
     ],
-    component: <Ten/>
+    component: Ten
   },
   {
     name: 'lifeTheUniverseAndEverything',
-    component: <HitchHikerComponent/>
+    component: HitchHikerComponent
   },
 ];
 
@@ -79,7 +79,7 @@ export class Example extends React.Component {
       <StateMachine
         getCurrentState={() => this.state.stateName}
         setNewState={stateName => this.setState(() => ({ stateName }))}
-        data={n}
+        data={{n}}
         states={states}
       />
 

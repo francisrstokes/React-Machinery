@@ -16,7 +16,6 @@
     - [setNewState](#setnewstate)
     - [states](#states)
     - [data](#data)
-    - [props](#props)
 
 ## Description
 
@@ -93,12 +92,19 @@ A state definition is a plain javascript object with the following properties:
     'Name of valid state'
   ],
 
+  // effect is an optional function that can run some code before this states component
+  // is rendered. For anything sufficiently complex however, it's better to use a react class
+  // component and take advantage of lifecycle hooks
+  effect: (data) => {
+    data.startAPIRequest();
+  },
+
     // One of the following two properties must be implemented:
 
-  // a render prop that recieves the name of the current state as an argument
-  // The second argument passes the 'props' object supplied to the StateMachine
-  render: (currentState, additionalProps) => {
-    return <SomeComponent propUsingStateName={currentState} {...additionalProps} />
+  // a render prop that recieves the 'props' object supplied to the StateMachine
+  // the props object will also include a 'transitionTo' function and a 'currentState' string
+  render: (data) => {
+    return <SomeComponent propUsingStateName={data.currentState} {...data} />
   },
 
   // Or just a regular react component
@@ -108,12 +114,6 @@ A state definition is a plain javascript object with the following properties:
 
 #### data
 
-##### any
-
-Any kind of data that defines all the states in the state machine.
-
-#### props
-
 ##### object
 
-These props are supplied to the component rendered by any state. If a render prop is used for the state, then the props are passed as the second argument.
+An object contains data that defines all the states in the state machine. This data is supplied to the component rendered by any state, to `test` functions in autoTransitions. If a render prop is used for the state, then the props are passed as the argument, along with a `transitionTo` function and `currentState` name.

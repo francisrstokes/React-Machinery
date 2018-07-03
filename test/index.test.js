@@ -43,7 +43,7 @@ test('Render a valid state (render prop)', () => {
   const states = [
     {
       name: 'state-1',
-      render: stateName => <div>Hello, {stateName}</div>
+      render: ({currentState}) => <div>Hello, {currentState}</div>
     }
   ];
 
@@ -59,7 +59,6 @@ test('Render a valid state (render prop)', () => {
 });
 
 test('Should pass additional props to state component if they are present', () => {
-  const data = {};
   const state = 'state-1';
 
   const states = [
@@ -77,9 +76,8 @@ test('Should pass additional props to state component if they are present', () =
     <StateMachine
       getCurrentState={() => state}
       setNewState={() => {}}
-      data={data}
+      data={extraProps}
       states={states}
-      props={extraProps}
     />
   );
 
@@ -87,14 +85,13 @@ test('Should pass additional props to state component if they are present', () =
   expect(propNames.includes('extraProp1')).toEqual(true);
 });
 
-test('Should pass additional props to state render if they are present', () => {
-  const data = {};
+test('Pass additional props to state render if they are present', () => {
   const state = 'state-1';
 
   const states = [
     {
       name: 'state-1',
-      render: (currentState, props) => {
+      render: (props) => {
         return <State1Component {...props}/>
       }
     }
@@ -108,9 +105,8 @@ test('Should pass additional props to state render if they are present', () => {
     <StateMachine
       getCurrentState={() => state}
       setNewState={() => {}}
-      data={data}
+      data={extraProps}
       states={states}
-      props={extraProps}
     />
   );
 
@@ -118,16 +114,71 @@ test('Should pass additional props to state render if they are present', () => {
   expect(propNames.includes('extraProp1')).toEqual(true);
 });
 
-test('Rendered components should be passed a transitionTo function', () => {
+test('Should run a state\'s effect before it\'s rendered if one is present' , () => {
+  const data = {};
+  const state = 'state-1';
+
+  let effectCalled;
+  let effectCalledFirst;
+
+  const states = [
+    {
+      name: 'state-1',
+      effect: () => {
+        effectCalled = true;
+      },
+      render: () => {
+        effectCalledFirst = !!effectCalled;
+        return <State1Component/>
+      }
+    }
+  ];
+
+  const stateMachine = mount(
+    <StateMachine
+      getCurrentState={() => state}
+      setNewState={() => {}}
+      data={data}
+      states={states}
+    />
+  );
+
+  expect(effectCalledFirst).toEqual(true);
+});
+
+test('Throw on an invalid effect', () => {
+  spyOn(console, 'error');
   const data = {};
   const state = 'state-1';
 
   const states = [
     {
       name: 'state-1',
-      render: (currentState, props) => {
-        return <State1Component {...props}/>
-      }
+      effect: /regex/,
+      component: State1Component
+    }
+  ];
+
+  expect(() => {
+    mount(
+      <StateMachine
+        getCurrentState={() => state}
+        setNewState={() => {}}
+        data={data}
+        states={states}
+      />
+    );
+  }).toThrow();
+});
+
+test('Pass rendered components a transitionTo function and currentState name', () => {
+  const data = {};
+  const state = 'state-1';
+
+  const states = [
+    {
+      name: 'state-1',
+      component: State1Component
     }
   ];
 
@@ -143,6 +194,8 @@ test('Rendered components should be passed a transitionTo function', () => {
   const childProps = stateMachine.children().props();
   expect(Boolean(childProps.transitionTo)).toEqual(true);
   expect(typeof childProps.transitionTo).toEqual('function');
+  expect(Boolean(childProps.currentState)).toEqual(true);
+  expect(childProps.currentState).toEqual(state);
 });
 
 test('Throw on an invalid state', () => {
@@ -176,6 +229,9 @@ test('Transition from one state to another', async () => {
   const states = [
     {
       name: 'state-1',
+      // effect: ({a}) => {
+      //   if 
+      // },
       autoTransitions: [
         {
           test: ({a}) => a === 2,

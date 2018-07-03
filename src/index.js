@@ -9,13 +9,23 @@ export class StateMachine extends React.Component {
   }
 
   transition(oldState, newState) {
-    if (!this.props.states.find(state => state.name === newState)) {
+    const nextState = this.props.states.find(state => state.name === newState);
+    if (!nextState) {
       const validStates = this.props.states.map(state => state.name).join(", ");
       throw new Error(
         `Tried to transition from state '${oldState}' to '${newState}'. Valid states are: [${validStates}]`
       );
     }
+
     this.props.setNewState(newState);
+
+    if (nextState.effect) {
+      nextState.effect({
+        ...this.props.data,
+        currentState: newState,
+        transitionTo: this.createTransitionToFn(nextState),
+      });
+    }
   }
 
   update() {
@@ -37,6 +47,15 @@ export class StateMachine extends React.Component {
     this.update();
   }
 
+  createTransitionToFn = currentState => newState => {
+    if (!(currentState.validTransitions && currentState.validTransitions.includes(newState))) {
+      throw new Error(
+        `'${newState}' is not listed in transitions array for state ${currentState.name}`
+      );
+    }
+    this.transition(currentState.name, newState);
+  }
+
   render() {
     const currentStateName = this.props.getCurrentState();
     const currentState = this.props.states.find(
@@ -44,18 +63,12 @@ export class StateMachine extends React.Component {
     );
 
     const additionalProps = {
-      ...(this.props.props || {}),
-      transitionTo: newState => {
-        if (!(currentState.validTransitions && currentState.validTransitions.includes(newState))) {
-          throw new Error(
-            `'${newState}' is not listed in transitions array for state ${currentStateName}`
-          );
-        }
-        this.transition(currentStateName, newState);
-      },
+      ...this.props.data,
+      currentState: currentStateName,
+      transitionTo: this.createTransitionToFn(currentState),
     };
 
-    if (currentState.render) return currentState.render(currentStateName, additionalProps);
+    if (currentState.render) return currentState.render(additionalProps);
     if (currentState.component) return React.createElement(currentState.component, additionalProps);
 
     throw new Error(
@@ -77,15 +90,15 @@ const statePropTypes = PropTypes.arrayOf(
     autoTransitions: autoTransitionsPropTypes,
     validTransitions: PropTypes.arrayOf(PropTypes.string),
 
+    effect: PropTypes.func,
     component: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     render: PropTypes.func
   })
 ).isRequired;
 
 StateMachine.propTypes = {
-  data: PropTypes.any.isRequired,
+  data: PropTypes.object.isRequired,
   getCurrentState: PropTypes.func.isRequired,
   setNewState: PropTypes.func.isRequired,
   states: statePropTypes,
-  props: PropTypes.object
 };
