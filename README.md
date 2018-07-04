@@ -92,10 +92,10 @@ A state definition is a plain javascript object with the following properties:
     'Name of valid state'
   ],
 
-  // effect is an optional function that can run some code before this states component
+  // beforeRender is an optional function that can run some code before this states component
   // is rendered. For anything sufficiently complex however, it's better to use a react class
   // component and take advantage of lifecycle hooks
-  effect: (data) => {
+  beforeRender: (data) => {
     data.startAPIRequest();
   },
 

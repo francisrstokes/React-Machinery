@@ -114,21 +114,21 @@ test('Pass additional props to state render if they are present', () => {
   expect(propNames.includes('extraProp1')).toEqual(true);
 });
 
-test('Should run a state\'s effect before it\'s rendered if one is present' , () => {
+test('Should run a state\'s beforeRender before it\'s rendered if one is present' , () => {
   const data = {};
   const state = 'state-1';
 
-  let effectCalled;
-  let effectCalledFirst;
+  let beforeRenderCalled;
+  let beforeRenderCalledFirst;
 
   const states = [
     {
       name: 'state-1',
-      effect: () => {
-        effectCalled = true;
+      beforeRender: () => {
+        beforeRenderCalled = true;
       },
       render: () => {
-        effectCalledFirst = !!effectCalled;
+        beforeRenderCalledFirst = !!beforeRenderCalled;
         return <State1Component/>
       }
     }
@@ -143,10 +143,10 @@ test('Should run a state\'s effect before it\'s rendered if one is present' , ()
     />
   );
 
-  expect(effectCalledFirst).toEqual(true);
+  expect(beforeRenderCalledFirst).toEqual(true);
 });
 
-test('Throw on an invalid effect', () => {
+test('Throw on an invalid beforeRender', () => {
   spyOn(console, 'error');
   const data = {};
   const state = 'state-1';
@@ -154,7 +154,7 @@ test('Throw on an invalid effect', () => {
   const states = [
     {
       name: 'state-1',
-      effect: /regex/,
+      beforeRender: /regex/,
       component: State1Component
     }
   ];
@@ -229,7 +229,7 @@ test('Transition from one state to another', async () => {
   const states = [
     {
       name: 'state-1',
-      // effect: ({a}) => {
+      // beforeRender: ({a}) => {
       //   if 
       // },
       autoTransitions: [

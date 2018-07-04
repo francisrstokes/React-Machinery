@@ -19,8 +19,8 @@ export class StateMachine extends React.Component {
 
     this.props.setNewState(newState);
 
-    if (nextState.effect) {
-      nextState.effect({
+    if (nextState.beforeRender) {
+      nextState.beforeRender({
         ...this.props.data,
         currentState: newState,
         transitionTo: this.createTransitionToFn(nextState),
@@ -90,7 +90,7 @@ const statePropTypes = PropTypes.arrayOf(
     autoTransitions: autoTransitionsPropTypes,
     validTransitions: PropTypes.arrayOf(PropTypes.string),
 
-    effect: PropTypes.func,
+    beforeRender: PropTypes.func,
     component: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     render: PropTypes.func
   })
