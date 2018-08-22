@@ -4,6 +4,8 @@
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
 [![CircleCI](https://circleci.com/gh/francisrstokes/React-Machinery.png?circle-token=46dc2a2f9571dfc783c03c6550c3119c18c5b8ce&style=shield)]()
 
+<img src="img/logo.svg" align="center" height="200" width="200" >
+
 
 ⚙️ State Machine Modelling for React
 
@@ -117,3 +119,7 @@ A state definition is a plain javascript object with the following properties:
 ##### object
 
 An object contains data that defines all the states in the state machine. This data is supplied to the component rendered by any state, to `test` functions in autoTransitions. If a render prop is used for the state, then the props are passed as the argument, along with a `transitionTo` function and `currentState` name.
+
+# Logo
+
+The awesome logo was designed by @ayushs08, who graciously provided under CC BY 3.0. Many thanks!
